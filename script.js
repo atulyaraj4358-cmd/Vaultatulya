@@ -21,9 +21,9 @@ function confetti() {
     document.body.append(e); setTimeout(() => e.remove(), 3000); }
 }
 
-/* ---------- SUPABASE DATABASE (Realtime & Secure) ---------- */
-const SUPABASE_URL = "https://tsvzblhwagjufwrtzvdi.supabase.co"; 
-const SUPABASE_KEY = "sb_publishable_Zn1EgbGzj5FME8eQY35VVQ_Cbt29YBQ"; 
+/* ---------- SUPABASE DATABASE (Naya Project) ---------- */
+const SUPABASE_URL = "https://jgpkjkwhfexkjvyzpqar.supabase.co"; 
+const SUPABASE_KEY = "sb_publishable_q6z3S8fROzE3nlyFIeUH4A_Dtg6xkCd"; 
 
 const { createClient } = supabase;
 const dbClient = createClient(SUPABASE_URL, SUPABASE_KEY);
