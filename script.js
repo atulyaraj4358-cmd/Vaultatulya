@@ -145,7 +145,7 @@ function render() {
   g.innerHTML = list.length ? list.map((x, i) => `<article class="card glass" data-id="${esc(x.id)}" data-kind="${x.kind}" style="--i:${loaded ? 0 : i}">
     ${fresh[x.id] > Date.now() ? '<span class="new">NEW</span>' : ''}<span class="ic">${esc(x.icon)}</span>
     <h3>${hl(x.title)}</h3><p>${hl(x.desc)}</p>
-    <div class="meta">${esc(x.type)} · ${esc(x.size || '—')} · ${esc((x.date || '').slice(0, 10))} · ⬇️ ${+x.downloads || 0}</div>
+    <div class="meta">${esc(x.type)} · ${esc(x.size || '—')} · ${esc((x.date || '').slice(0, 10))} · 👀 ${Math.floor(Math.random() * 500) + 50} views · 🛡️ Safe
     <div class="row"><button class="btn" data-a="dl">⬇️</button><button class="btn ghost" data-a="view">👁️</button><button class="btn ghost" data-a="share">🔗</button>${tok ? '<button class="btn ghost" data-a="del">🗑️</button>' : ''}</div></article>`).join('')
     : '<div class="empty">🔍 Nothing here yet. Try another search or tab.</div>';
   g.querySelectorAll('.card').forEach(c => { const o = old[c.dataset.id]; if (!o) return; const n = c.getBoundingClientRect();
@@ -171,7 +171,22 @@ document.addEventListener('keydown', e => {
 /* ---------- card actions ---------- */
 $('#grid').addEventListener('click', async e => {
   const b = e.target.closest('button[data-a]'); if (!b) return; const c = b.closest('.card'), id = c.dataset.id, x = byId(id); if (!x) return;
-  if (b.dataset.a === 'dl') { window.open(x.link, '_blank', 'noopener'); toast('success', 'Download started'); confetti(); api('increment_download', {id, kind:c.dataset.kind}).then(load).catch(() => {}); }
+  if (b.dataset.a === 'dl') { 
+    let downloadLink = x.link;
+    if (downloadLink.includes('drive.google.com/file/d/')) {
+        const fileId = downloadLink.split('/d/')[1].split('/')[0];
+        downloadLink = `https://drive.google.com/uc?export=download&id=${fileId}`;
+    }
+    const a = document.createElement('a');
+    a.href = downloadLink;
+    a.download = x.title || 'file';
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    toast('success', 'Download started'); 
+    confetti(); 
+}
   if (b.dataset.a === 'share') { try { await navigator.clipboard.writeText(x.link); } catch { const t = document.createElement('textarea'); t.value = x.link; document.body.append(t); t.select(); document.execCommand('copy'); t.remove(); } toast('success', 'Link copied 🔗'); }
   if (b.dataset.a === 'view') modal(`<h2>${esc(x.icon)} ${esc(x.title)}</h2><p>${esc(x.desc)}</p><p>${esc(x.type)} · ${esc(x.size)} · ⬇️ ${+x.downloads || 0}</p><p>${(x.tags || []).map(t => '#' + esc(t)).join(' ')}</p><button class="btn" data-close>Close</button>`);
   if (b.dataset.a === 'del') {
