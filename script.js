@@ -22,7 +22,7 @@ function confetti() {
 }
 
 /* ---------- SUPABASE DATABASE (Realtime & Secure) ---------- */
-const SUPABASE_URL = "https://tsvzblhwagjufwrtzvdi.supabase.com"; 
+const SUPABASE_URL = "https://tsvzblhwagjufwrtzvdi.supabase.co"; 
 const SUPABASE_KEY = "sb_publishable_Zn1EgbGzj5FME8eQY35VVQ_Cbt29YBQ"; 
 
 const { createClient } = supabase;
