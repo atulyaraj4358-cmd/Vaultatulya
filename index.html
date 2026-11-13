@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en" data-theme="aurora">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>A Vault 🔒</title>
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#7c5cff">
+</head>
+<body>
+<div class="orbs" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+<div id="prog"></div>
+<nav class="glass">
+  <b id="logo">🔒 A Vault</b>
+  <span id="dot" class="dot sync" title="Sync status"></span>
+  <span id="pill" hidden>Offline</span>
+  <span id="themes" aria-label="Themes"></span>
+  <span id="who"></span>
+  <button id="loginBtn" class="btn sm">Log in</button>
+</nav>
+<header class="hero">
+  <span class="badge">✨ Premium vault</span>
+  <h1 id="title" aria-label="Everything you love. One Vault."></h1>
+  <p class="tag">Your premium file &amp; app vault 🔒 &nbsp;<b id="word">APK</b></p>
+  <a class="btn" href="#grid">Browse the vault ⬇️</a> <button class="btn ghost" id="gamesBtn">🎮 Games</button>
+</header>
+<main>
+  <input id="search" type="search" placeholder="🔍 Search files, apps, tags" aria-label="Search">
+  <div id="tabs" class="glass" role="tablist"></div>
+  <div id="admin" hidden><button id="addBtn" class="btn sm">+ Add File</button> <button id="addApp" class="btn sm">+ Add App</button></div>
+  <section id="grid"></section>
+</main>
+<div id="toasts" aria-live="polite"></div>
+<div id="modal" hidden></div>
+<script src="script.js"></script>
+<script src="games.js"></script>
+<script src="phone.js"></script>
+</body>
+</html>
