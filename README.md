@@ -18,7 +18,7 @@ index.html · style.css · script.js · games.js · phone.js · api.php · admin
 Upload to `public_html`, same permissions (data.json 664), edit `admin.php`, force HTTPS from the SSL/TLS panel.
 
 ## Admin
-Log in with the admin user from `admin.php` (default `atulya` / `admin`, **change it**). Use "+ Add File" / "+ Add App"; delete with 🗑️ (undo for 6 s).
+Log 
 
 ## Testing checklist
 1. Open the site on phone A and phone B (not logged in on B).
