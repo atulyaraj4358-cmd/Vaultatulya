@@ -21,93 +21,66 @@ function confetti() {
     document.body.append(e); setTimeout(() => e.remove(), 3000); }
 }
 
-/* ---------- JSONBIN.IO DATABASE (Shared Data) ---------- */
-const BIN_ID = "6af6c554ac6210605a8463f2"; 
-const MASTER_KEY = "$2a$10$dOVGwdVlcWmlzw5NZxwb.eJ8I.zTa/rcZNx2bwlVPLZhJbTa9sgGS"; 
+/* ---------- SUPABASE DATABASE (Realtime & Secure) ---------- */
+const SUPABASE_URL = "https://tsvzblhwagjufwrtzvdi.supabase.co"; 
+const SUPABASE_KEY = "sb_publishable_Zn1EgbGzj5FME8eQY35VVQ_Cbt29YBQ"; 
 
-async function getBin() {
-    const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-        headers: { 'X-Master-Key': MASTER_KEY }
-    });
-    const json = await res.json();
-    return json.record;
-}
-
-async function updateBin(data) {
-    await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-Master-Key': MASTER_KEY
-        },
-        body: JSON.stringify(data)
-    });
-}
+const { createClient } = supabase;
+const dbClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 async function api(action, body) {
     try {
-        let data = await getBin();
-        if (!data) data = {};
-        if (!data.files) data.files = [];
-        if (!data.apps) data.apps = [];
-        if (!data.scores) data.scores = {};
-        if (!data.deleted) data.deleted = [];
-        if (!data.version) data.version = Date.now();
-
         if (action === 'list' || action === 'version') {
-            return { version: data.version, files: data.files, apps: data.apps, scores: data.scores, deleted: data.deleted };
+            const { data, error } = await dbClient.from('vault_files').select('*').order('date', { ascending: false });
+            if (error) throw error;
+            return { version: Date.now(), files: data || [], apps: [], scores: {}, deleted: [] };
         }
 
         if (action === 'login') {
-            if (body.user === 'atulya' && body.pass === 'admin') {
-                return { token: 'admin-token' };
-            }
+            if (body.user === 'atulya' && body.pass === 'admin') return { token: 'admin-token' };
             throw new Error('Wrong credentials');
         }
 
         if (action === 'add') {
             const newItem = {
-                id: Date.now().toString(),
                 title: body.title, desc: body.desc, type: body.type, size: body.size,
-                link: body.link, icon: body.icon, tags: body.tags || [],
-                date: new Date().toISOString(), downloads: 0,
-                addedBy: (typeof user !== 'undefined' && user) ? user : 'atulya'
+                link: body.link, icon: body.icon
             };
-            if (body.kind === 'apps') data.apps.unshift(newItem);
-            else data.files.unshift(newItem);
-            
-            data.version = Date.now();
-            await updateBin(data);
-            return { item: newItem };
+            const { data, error } = await dbClient.from('vault_files').insert([newItem]).select();
+            if (error) throw error;
+            return { item: data[0] };
         }
 
         if (action === 'delete') {
-            data.files = data.files.filter(f => f.id !== body.id);
-            data.apps = data.apps.filter(a => a.id !== body.id);
-            data.version = Date.now();
-            await updateBin(data);
+            const { error } = await dbClient.from('vault_files').delete().eq('id', body.id);
+            if (error) throw error;
             return { ok: true };
         }
 
         if (action === 'increment_download') {
-            const list = body.kind === 'apps' ? data.apps : data.files;
-            const item = list.find(x => x.id === body.id);
-            if (item) {
-                item.downloads = (item.downloads || 0) + 1;
-                data.version = Date.now();
-                await updateBin(data);
-            }
+            const { data } = await dbClient.from('vault_files').select('downloads').eq('id', body.id).single();
+            if (data) await dbClient.from('vault_files').update({ downloads: (data.downloads || 0) + 1 }).eq('id', body.id);
             return { ok: true };
         }
         
-        return { version: Date.now(), ...data };
+        return { version: Date.now(), files: [], apps: [] };
 
     } catch (e) {
-        console.error("Database Error:", e);
-        if (typeof toast === 'function') toast('error', 'Database Error: Connection failed');
+        console.error("Supabase Error:", e);
+        if (typeof toast === 'function') toast('error', 'Database Error: ' + e.message);
         throw e;
     }
 }
+
+function initRealtime() {
+    dbClient.channel('custom-all-channel')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'vault_files' }, payload => {
+          load(); 
+      })
+      .subscribe();
+}
+
+function setDot(s) { $('#dot').className = 'dot ' + s; $('#pill').hidden = s !== 'off'; }
 function setDot(s) { $('#dot').className = 'dot ' + s; $('#pill').hidden = s !== 'off'; }
 
 /* ---------- sync ---------- */
