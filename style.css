@@ -99,7 +99,6 @@ mark{background:var(--b);color:#000;border-radius:4px}
 .hind{position:absolute;bottom:8px;left:50%;width:120px;height:5px;margin-left:-60px;border-radius:9px;background:#fff;z-index:10;cursor:pointer}
 .ph-x{position:absolute;top:18px;right:22px;z-index:12;border:0;background:#0006;border-radius:50%;width:28px;height:28px;color:#fff;cursor:pointer}
 @media(max-width:520px){#phone{inset:0;left:0;top:0;width:100%;height:100%;max-height:none;border-radius:0;padding:0}.ph-screen{border-radius:0}}
-/* ===== Phase 4 ===== */
 #fxc{position:fixed;inset:0;z-index:-1;pointer-events:none}
 body::before{content:"";position:fixed;inset:-30%;z-index:-2;background:conic-gradient(from 0deg,var(--a),transparent 25%,var(--b),transparent 60%,var(--a));filter:blur(90px);opacity:.22;animation:spin 40s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
