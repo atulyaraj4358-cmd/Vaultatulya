@@ -81,8 +81,6 @@ function initRealtime() {
 }
 
 function setDot(s) { $('#dot').className = 'dot ' + s; $('#pill').hidden = s !== 'off'; }
-function setDot(s) { $('#dot').className = 'dot ' + s; $('#pill').hidden = s !== 'off'; }
-
 /* ---------- sync ---------- */
 async function load() {
   setDot('sync');
@@ -96,13 +94,8 @@ async function load() {
     known = new Set(all.map(x => x.id)); S = d; render();
   } catch (e) { fails++; setDot('off'); }
 }
-async function poll() {
-  let wait = document.hidden ? 60000 : 30000;
-  try { const v = await api('version'); fails = 0; setDot(''); if (v.version !== S.version) await load(); }
-  catch (e) { fails++; setDot('off'); wait = Math.min(120000, 30000 * 2 ** fails); }
-  setTimeout(poll, wait);
-}
 ['focus', 'online'].forEach(e => addEventListener(e, load)); document.addEventListener('visibilitychange', () => !document.hidden && load());
+
 /* ---------- render ---------- */
 function items() {
   const all = [...S.files.map(x => ({...x, kind:'files'})), ...S.apps.map(x => ({...x, kind:'apps'}))].filter(x => !hidden.has(x.id));
@@ -196,7 +189,6 @@ function addForm(app) {
   };
 }
 $('#addBtn').onclick = () => addForm(false); $('#addApp').onclick = () => addForm(true);
-
 /* ---------- UI setup ---------- */
 $('#tabs').innerHTML = TABS.map(t => `<button role="tab" aria-selected="${t === 'All'}">${t}</button>`).join('');
 $('#tabs').onclick = e => { const b = e.target.closest('button'); if (!b) return; tab = b.textContent; $('#tabs').querySelectorAll('button').forEach(x => x.setAttribute('aria-selected', x === b)); render(); };
@@ -212,7 +204,8 @@ const words = ['APK','PDF','ZIP','GAME','APP']; let wi = 0;
 setInterval(() => { const w = $('#word'); w.classList.add('out'); setTimeout(() => { wi = (wi + 1) % 5; w.textContent = words[wi]; w.classList.remove('out'); }, 400); }, 2200);
 addEventListener('scroll', () => { const h = document.documentElement; $('#prog').style.transform = `scaleX(${scrollY / Math.max(1, h.scrollHeight - innerHeight)})`; document.querySelector('nav').style.backdropFilter = `blur(${24 + Math.min(scrollY / 20, 16)}px) saturate(180%)`; }, {passive:true});
 let taps = 0, tt; $('#logo').onclick = () => { taps++; clearTimeout(tt); tt = setTimeout(() => taps = 0, 1500); if (taps >= 5) { taps = 0; confetti(); confetti(); } };
-paintUser(); load().then(() => setTimeout(poll, 5000));
+paintUser(); load().then(() => initRealtime());
+
 /* ===== Phase 4: Animation Booster ===== */
 (() => {
 const de = document.documentElement, LV = ['high', 'low', 'off'];
