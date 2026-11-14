@@ -96,7 +96,6 @@ async function load() {
   } catch (e) { fails++; setDot('off'); }
 }
 ['focus', 'online'].forEach(e => addEventListener(e, load)); document.addEventListener('visibilitychange', () => !document.hidden && load());
-
 /* ---------- render ---------- */
 function items() {
   const all = [...S.files.map(x => ({...x, kind:'files'})), ...S.apps.map(x => ({...x, kind:'apps'}))].filter(x => !hidden.has(x.id));
@@ -104,7 +103,9 @@ function items() {
   if (!q) return f;
   const k = q.toLowerCase(); return f.filter(x => [x.title, x.desc, x.type, ...(x.tags || [])].join(' ').toLowerCase().includes(k));
 }
-function hl(s) {function render() {
+function hl(s) { const e = esc(s); if (!q) return e; return e.replace(new RegExp('(' + esc(q).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi'), '<mark>$1</mark>'); }
+
+function render() {
   const list = items(), g = $('#grid'), old = {};
   g.querySelectorAll('.card').forEach(c => old[c.dataset.id] = c.getBoundingClientRect());
   g.innerHTML = list.length ? list.map((x, i) => `<article class="card glass" data-id="${esc(x.id)}" data-kind="${x.kind}" style="--i:${loaded ? 0 : i}">
@@ -189,7 +190,7 @@ function addForm(app) {
     try { const r = await api('add', b); known?.add(r.item.id); closeModal(); confetti(); toast('success', 'Published!'); load(); } catch (e) { toast('error', e.status === 403 ? 'Session expired. Log in again.' : e.message); }
   };
 }
-$('#addBtn').onclick = () => addForm(false); $('#addApp').onclick = () => addForm(true); const e = esc(s); if (!q) return e; return e.replace(new RegExp('(' + esc(q).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi'), '<mark>$1</mark>'); }
+$('#addBtn').onclick = () => addForm(false); $('#addApp').onclick = () => addForm(true);
 /* ---------- UI setup ---------- */
 $('#tabs').innerHTML = TABS.map(t => `<button role="tab" aria-selected="${t === 'All'}">${t}</button>`).join('');
 $('#tabs').onclick = e => { const b = e.target.closest('button'); if (!b) return; tab = b.textContent; $('#tabs').querySelectorAll('button').forEach(x => x.setAttribute('aria-selected', x === b)); render(); };
