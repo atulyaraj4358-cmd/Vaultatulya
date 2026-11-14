@@ -1,7 +1,7 @@
 'use strict';
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const TABS = ['All','APK','PDF','ZIP','Apps','Games'];
+const TABS = ['All','APK','PDF','ZIP']; 
 const THEMES = {aurora:'🌌',sunset:'🌅',ocean:'🌊',candy:'🍬',neon:'🌃',forest:'🌲'};
 let S = {version:0, files:[], apps:[]}, tab = 'All', q = '', hidden = new Set(), fresh = {}, known = null, fails = 0, loaded = false;
 let tok = sessionStorage.getItem('av_tok'), user = localStorage.getItem('av_user') || '';
@@ -21,7 +21,7 @@ function confetti() {
     document.body.append(e); setTimeout(() => e.remove(), 3000); }
 }
 
-/* ---------- SUPABASE DATABASE (Naya Project) ---------- */
+/* ---------- SUPABASE DATABASE ---------- */
 const SUPABASE_URL = "https://jgpkjkwhfexkjvyzpqar.supabase.co"; 
 const SUPABASE_KEY = "sb_publishable_q6z3S8fROzE3nlyFIeUH4A_Dtg6xkCd"; 
 
@@ -81,6 +81,7 @@ function initRealtime() {
 }
 
 function setDot(s) { $('#dot').className = 'dot ' + s; $('#pill').hidden = s !== 'off'; }
+
 /* ---------- sync ---------- */
 async function load() {
   setDot('sync');
@@ -103,8 +104,7 @@ function items() {
   if (!q) return f;
   const k = q.toLowerCase(); return f.filter(x => [x.title, x.desc, x.type, ...(x.tags || [])].join(' ').toLowerCase().includes(k));
 }
-function hl(s) { const e = esc(s); if (!q) return e; return e.replace(new RegExp('(' + esc(q).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi'), '<mark>$1</mark>'); }
-function render() {
+function hl(s) {function render() {
   const list = items(), g = $('#grid'), old = {};
   g.querySelectorAll('.card').forEach(c => old[c.dataset.id] = c.getBoundingClientRect());
   g.innerHTML = list.length ? list.map((x, i) => `<article class="card glass" data-id="${esc(x.id)}" data-kind="${x.kind}" style="--i:${loaded ? 0 : i}">
@@ -179,7 +179,8 @@ $('#loginBtn').onclick = () => {
 /* ---------- admin add ---------- */
 function addForm(app) {
   modal(`<h2>${app ? '📱 Add App' : '➕ Add File'}</h2><div class="f"><input id="t" placeholder="Title" maxlength="80"><textarea id="d" placeholder="Description" maxlength="300"></textarea>
-  <select id="ty">${(app ? ['APP','GAME','APK','ZIP'] : ['APK','PDF','ZIP']).map(t => `<option>${t}</option>`).join('')}</select><input id="sz" placeholder="Size (e.g. 24 MB)"><input id="ln" type="url" placeholder="https://download-link"><input id="ic" placeholder="Emoji icon (optional)" maxlength="4"><input id="tg" placeholder="Tags, comma separated"><button class="btn" id="pub">Publish</button></div>`);
+  <select id="ty"><option value="APK">APK</option><option value="PDF">PDF</option><option value="ZIP">ZIP</option></select>
+  <input id="sz" placeholder="Size (e.g. 24 MB)"><input id="ln" type="url" placeholder="https://download-link"><input id="ic" placeholder="Emoji icon (optional)" maxlength="4"><input id="tg" placeholder="Tags, comma separated"><button class="btn" id="pub">Publish</button></div>`);
   $('#pub').onclick = async () => {
     const b = {kind:app ? 'apps' : 'files', title:$('#t').value, desc:$('#d').value, type:$('#ty').value, size:$('#sz').value, link:$('#ln').value, icon:$('#ic').value, tags:$('#tg').value.split(',').map(s => s.trim()).filter(Boolean)};
     if (!b.title.trim()) return toast('error', 'Please add a title');
@@ -188,7 +189,7 @@ function addForm(app) {
     try { const r = await api('add', b); known?.add(r.item.id); closeModal(); confetti(); toast('success', 'Published!'); load(); } catch (e) { toast('error', e.status === 403 ? 'Session expired. Log in again.' : e.message); }
   };
 }
-$('#addBtn').onclick = () => addForm(false); $('#addApp').onclick = () => addForm(true);
+$('#addBtn').onclick = () => addForm(false); $('#addApp').onclick = () => addForm(true); const e = esc(s); if (!q) return e; return e.replace(new RegExp('(' + esc(q).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi'), '<mark>$1</mark>'); }
 /* ---------- UI setup ---------- */
 $('#tabs').innerHTML = TABS.map(t => `<button role="tab" aria-selected="${t === 'All'}">${t}</button>`).join('');
 $('#tabs').onclick = e => { const b = e.target.closest('button'); if (!b) return; tab = b.textContent; $('#tabs').querySelectorAll('button').forEach(x => x.setAttribute('aria-selected', x === b)); render(); };
@@ -199,9 +200,19 @@ $('#themes').querySelectorAll('button').forEach(b => b.style.background = `linea
 function setTheme(t) { document.documentElement.dataset.theme = t; localStorage.setItem('av_theme', t); $('#themes').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.t === t)); }
 $('#themes').onclick = e => { const b = e.target.closest('button'); if (b) setTheme(b.dataset.t); };
 setTheme(localStorage.getItem('av_theme') in THEMES ? localStorage.getItem('av_theme') : 'aurora');
-$('#title').innerHTML = [...'Everything you love. One Vault.'].map((c, i) => c === ' ' ? ' ' : `<span style="animation-delay:${i * 45}ms">${esc(c)}</span>`).join('');
-const words = ['APK','PDF','ZIP','GAME','APP']; let wi = 0;
-setInterval(() => { const w = $('#word'); w.classList.add('out'); setTimeout(() => { wi = (wi + 1) % 5; w.textContent = words[wi]; w.classList.remove('out'); }, 400); }, 2200);
+
+/* ---------- DYNAMIC PREMIUM TITLE ---------- */
+const premiumTitles = ["Your Personal Vault.", "Premium Files.", "Unlock the Best.", "Atulya's Vault."];
+let titleIdx = 0;
+function changePremiumTitle() {
+  $('#title').innerHTML = [...premiumTitles[titleIdx]].map((c, i) => c === ' ' ? ' ' : `<span style="animation-delay:${i * 45}ms">${esc(c)}</span>`).join('');
+  titleIdx = (titleIdx + 1) % premiumTitles.length;
+}
+changePremiumTitle();
+setInterval(changePremiumTitle, 4000);
+
+const words = ['APK','PDF','ZIP','FILE']; let wi = 0;
+setInterval(() => { const w = $('#word'); w.classList.add('out'); setTimeout(() => { wi = (wi + 1) % 4; w.textContent = words[wi]; w.classList.remove('out'); }, 400); }, 2200);
 addEventListener('scroll', () => { const h = document.documentElement; $('#prog').style.transform = `scaleX(${scrollY / Math.max(1, h.scrollHeight - innerHeight)})`; document.querySelector('nav').style.backdropFilter = `blur(${24 + Math.min(scrollY / 20, 16)}px) saturate(180%)`; }, {passive:true});
 let taps = 0, tt; $('#logo').onclick = () => { taps++; clearTimeout(tt); tt = setTimeout(() => taps = 0, 1500); if (taps >= 5) { taps = 0; confetti(); confetti(); } };
 paintUser(); load().then(() => initRealtime());
@@ -215,14 +226,12 @@ const fxb = document.createElement('button'); fxb.className = 'btn sm ghost'; $(
 const setFx = (v, keep, auto) => { fx = v; de.dataset.fx = v; fxb.textContent = '✨ ' + v[0].toUpperCase() + v.slice(1); if (keep) localStorage.setItem('av_fx', v); if (auto) toast('info', 'Effects set to ' + v + ' for smoother speed'); };
 fxb.onclick = () => setFx(LV[(LV.indexOf(fx) + 1) % 3], true); setFx(fx);
 
-/* loader: ring draws itself, then liquid circle reveal */
+/* loader */
 const L = document.createElement('div'); L.id = 'loader'; L.innerHTML = '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44"/></svg><span>🔒</span>'; document.body.append(L);
 setTimeout(() => L.classList.add('gone'), fx === 'off' ? 100 : 1300); setTimeout(() => L.remove(), fx === 'off' ? 300 : 2200);
-
-/* skeleton shimmer until first data */
 if (!known) $('#grid').innerHTML = '<div class="card glass sk"></div>'.repeat(6);
 
-/* stars, shooting stars, floating emoji, FPS guard */
+/* stars, floating emoji */
 const cv = document.createElement('canvas'); cv.id = 'fxc'; cv.setAttribute('aria-hidden', 'true'); document.body.prepend(cv); const c = cv.getContext('2d');
 let w, h; const rs = () => { w = cv.width = innerWidth; h = cv.height = innerHeight; }; rs(); addEventListener('resize', rs);
 const stars = Array.from({length:90}, () => ({x:Math.random(), y:Math.random(), r:Math.random() * 1.6 + .4, p:Math.random() * 6}));
@@ -241,7 +250,7 @@ let shoot = null, t0 = 0, fr = 0, low = 0, prev = 0;
   c.globalAlpha = 1;
 })(0);
 
-/* cursor glow, sparkle trail, orb parallax + gyroscope, magnetic buttons, ripple */
+/* cursor glow, ripple, magnetic */
 const glow = document.createElement('div'); glow.id = 'glow'; document.body.append(glow); let lt = 0; const orbs = $('.orbs');
 document.addEventListener('pointermove', e => {
   glow.style.transform = `translate(${e.clientX - 100}px,${e.clientY - 100}px)`; orbs.style.setProperty('--px', e.clientX / innerWidth - .5); orbs.style.setProperty('--py', e.clientY / innerHeight - .5);
@@ -249,69 +258,27 @@ document.addEventListener('pointermove', e => {
   const b = e.target.closest?.('.btn'); if (b && fx === 'high') { const r = b.getBoundingClientRect(); b.style.translate = `${(e.clientX - r.left - r.width / 2) * .15}px ${(e.clientY - r.top - r.height / 2) * .25}px`; }
 });
 document.addEventListener('pointerout', e => { const b = e.target.closest?.('.btn'); if (b) b.style.translate = ''; });
-addEventListener('deviceorientation', e => { if (e.gamma == null) return; orbs.style.setProperty('--px', Math.max(-.5, Math.min(.5, e.gamma / 90))); orbs.style.setProperty('--py', Math.max(-.5, Math.min(.5, (e.beta - 45) / 90))); });
 document.addEventListener('pointerdown', e => { const b = e.target.closest('.btn'); if (!b || fx === 'off') return; const r = b.getBoundingClientRect(), s = document.createElement('span'); s.className = 'rip'; s.style.left = e.clientX - r.left + 'px'; s.style.top = e.clientY - r.top + 'px'; b.append(s); setTimeout(() => s.remove(), 650); });
 
-/* theme colour wave from the clicked dot */
+/* theme wave */
 $('#themes').addEventListener('click', e => { const b = e.target.closest('button'); if (!b || fx === 'off') return; const r = b.getBoundingClientRect(), d = document.createElement('div'); d.className = 'wave';
   d.style.left = r.left + r.width / 2 + 'px'; d.style.top = r.top + r.height / 2 + 'px'; d.style.background = `linear-gradient(135deg,${PAL[b.dataset.t]})`; document.body.append(d); setTimeout(() => d.remove(), 950); });
 
-/* liquid tab indicator */
+/* tabs indicator */
 const tabs = $('#tabs'), ind = document.createElement('i'); ind.className = 'ind'; tabs.prepend(ind);
 const mv = () => { const b = tabs.querySelector('[aria-selected=true]'); if (b) { ind.style.width = b.offsetWidth + 'px'; ind.style.transform = `translateX(${b.offsetLeft}px)`; } };
 tabs.addEventListener('click', () => requestAnimationFrame(mv)); addEventListener('resize', mv); mv(); document.fonts?.ready.then(mv);
 
-/* download button: ring then check */
+/* download ring */
 $('#grid').addEventListener('click', e => { const b = e.target.closest('button[data-a=dl]'); if (!b || b.dataset.busy) return; b.dataset.busy = 1;
   b.innerHTML = '<svg class="ring" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15"/></svg>'; setTimeout(() => b.textContent = '✅', 1300); setTimeout(() => { b.textContent = '⬇️'; delete b.dataset.busy; }, 2600); });
 
-/* fireworks on confetti (publish, new best, logo x5) + Konami emoji rain */
-function fireworks() { for (let k = 0; k < 3; k++) setTimeout(() => { const x = innerWidth * (.15 + Math.random() * .7), y = innerHeight * (.15 + Math.random() * .4), em2 = '🎆✨💥🌟'[k % 4 * 2 % 4] || '✨';
-  for (let i = 0; i < 18; i++) { const s = document.createElement('span'), a = i / 18 * 6.283; s.className = 'fw'; s.textContent = i % 3 ? '✨' : '🎆'; s.style.left = x + 'px'; s.style.top = y + 'px'; s.style.setProperty('--dx', Math.cos(a) * 110 + 'px'); s.style.setProperty('--dy', Math.sin(a) * 110 + 'px'); document.body.append(s); setTimeout(() => s.remove(), 1100); } }, k * 250); }
-const _cf = confetti; confetti = function () { _cf(); if (fx === 'high') fireworks(); };
-const KON = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a']; let ki = 0;
-document.addEventListener('keydown', e => { ki = e.key === KON[ki] ? ki + 1 : (e.key === KON[0] ? 1 : 0); if (ki === KON.length) { ki = 0; toast('success', 'Konami! 🎮');
-  for (let i = 0; i < 60; i++) { const s = document.createElement('span'); s.className = 'cf'; s.textContent = ['🎮','📱','🤖','📄','🗜️','✨','🔒'][i % 7]; s.style.left = Math.random() * 100 + 'vw'; s.style.setProperty('--x', '0px'); s.style.animationDelay = Math.random() * 1.5 + 's'; document.body.append(s); setTimeout(() => s.remove(), 4000); } } });
-
-/* counting-up stats + hero parallax */
-const st = document.createElement('p'); st.id = 'stats'; st.className = 'tag'; st.innerHTML = '📄 <b data-n="f">0</b> files · 📱 <b data-n="a">0</b> apps · ⬇️ <b data-n="d">0</b> downloads'; $('.hero .tag').after(st);
+/* stats count */
+const st = document.createElement('p'); st.id = 'stats'; st.className = 'tag'; st.innerHTML = '📄 <b data-n="f">0</b> files · ⬇️ <b data-n="d">0</b> downloads'; $('.hero .tag').after(st);
 function count(el, to) { const from = +el.dataset.v || 0, t = performance.now(); el.dataset.v = to; (function s(n) { const p = Math.min(1, (n - t) / 800); el.textContent = Math.round(from + (to - from) * (1 - (1 - p) ** 3)); if (p < 1) requestAnimationFrame(s); })(t); }
-const _r = render; render = function () { _r(); const d = [...S.files, ...S.apps].reduce((a, x) => a + (+x.downloads || 0), 0); count(st.querySelector('[data-n=f]'), S.files.length); count(st.querySelector('[data-n=a]'), S.apps.length); count(st.querySelector('[data-n=d]'), d); };
+const _r = render; render = function () { _r(); const d = [...S.files, ...S.apps].reduce((a, x) => a + (+x.downloads || 0), 0); count(st.querySelector('[data-n=f]'), S.files.length); count(st.querySelector('[data-n=d]'), d); };
 addEventListener('scroll', () => { $('.hero').style.transform = `translateY(${Math.min(scrollY, 600) * .25}px)`; $('.hero').style.opacity = Math.max(.2, 1 - scrollY / 700); }, {passive:true});
 })();
 
 // ---------- YE LINE TERE PHONE AUR GAMES KE LIYE ZAROORI HAI ----------
 { const _r = render; render = function () { _r(); Phone.sync(); }; }
-/* ---------- FINAL TITLE OVERRIDE ---------- */
-setTimeout(() => {
-  const titleEl = document.getElementById('title');
-  if (titleEl) {
-    const titles = ["Your Personal Vault.", "Premium Files.", "Unlock the Best.", "Atulya's Vault."];
-    let idx = 0;
-    
-    // Purana text turant mita do
-    titleEl.innerHTML = '';
-    
-    function changeTitle() {
-      titleEl.innerHTML = [...titles[idx]].map((c, i) => c === ' ' ? ' ' : `<span style="animation-delay:${i * 45}ms">${esc(c)}</span>`).join('');
-      idx = (idx + 1) % titles.length;
-    }
-    
-    changeTitle();
-    setInterval(changeTitle, 4000);
-  }
-}, 500); // 0.5 second baad purana text override karega
-/* ---------- FORCE TITLE OVERRIDE ---------- */
-setTimeout(() => {
-  const el = document.getElementById('title');
-  if (el) {
-    const titles = ["Your Personal Vault.", "Premium Files.", "Unlock the Best.", "Atulya's Vault."];
-    let idx = 0;
-    function change() {
-      el.innerHTML = [...titles[idx]].map((c, i) => c === ' ' ? ' ' : `<span style="animation-delay:${i * 45}ms">${esc(c)}</span>`).join('');
-      idx = (idx + 1) % titles.length;
-    }
-    change();
-    setInterval(change, 4000);
-  }
-}, 1000);
