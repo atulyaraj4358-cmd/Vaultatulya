@@ -236,7 +236,8 @@ if (!known) $('#grid').innerHTML = '<div class="card glass sk"></div>'.repeat(6)
 const cv = document.createElement('canvas'); cv.id = 'fxc'; cv.setAttribute('aria-hidden', 'true'); document.body.prepend(cv); const c = cv.getContext('2d');
 let w, h; const rs = () => { w = cv.width = innerWidth; h = cv.height = innerHeight; }; rs(); addEventListener('resize', rs);
 const stars = Array.from({length:90}, () => ({x:Math.random(), y:Math.random(), r:Math.random() * 1.6 + .4, p:Math.random() * 6}));
-const em = Array.from({length:10}, (_, i) => ({x:Math.random(), y:Math.random(), e:'🎮📱🤖📄🗜️✨'[[0, 2, 4, 5, 7, 9][i % 6]] || '✨', s:Math.random() * .3 + .15}));
+const floatEmojis = ['🎮', '📱', '🤖', '📄', '🗜️', '✨'];
+const em = Array.from({length:10}, (_, i) => ({x:Math.random(), y:Math.random(), e: floatEmojis[i % floatEmojis.length], s:Math.random() * .3 + .15}));
 let shoot = null, t0 = 0, fr = 0, low = 0, prev = 0;
 (function loop(t) {
   requestAnimationFrame(loop);
