@@ -282,3 +282,22 @@ addEventListener('scroll', () => { $('.hero').style.transform = `translateY(${Ma
 
 // ---------- YE LINE TERE PHONE AUR GAMES KE LIYE ZAROORI HAI ----------
 { const _r = render; render = function () { _r(); Phone.sync(); }; }
+/* ---------- FINAL TITLE OVERRIDE ---------- */
+setTimeout(() => {
+  const titleEl = document.getElementById('title');
+  if (titleEl) {
+    const titles = ["Your Personal Vault.", "Premium Files.", "Unlock the Best.", "Atulya's Vault."];
+    let idx = 0;
+    
+    // Purana text turant mita do
+    titleEl.innerHTML = '';
+    
+    function changeTitle() {
+      titleEl.innerHTML = [...titles[idx]].map((c, i) => c === ' ' ? ' ' : `<span style="animation-delay:${i * 45}ms">${esc(c)}</span>`).join('');
+      idx = (idx + 1) % titles.length;
+    }
+    
+    changeTitle();
+    setInterval(changeTitle, 4000);
+  }
+}, 500); // 0.5 second baad purana text override karega
