@@ -37,5 +37,16 @@
 <script src="script.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 <script>eruda.init();</script>
+  <!-- Naya Virtual Phone Button -->
+<button id="newPhoneBtn" class="btn" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; background: #ff006e; color: white; font-weight: bold; border: none; padding: 12px 20px; border-radius: 30px; box-shadow: 0 4px 15px rgba(255,0,110,0.4);">📱 Open Phone</button>
+<!-- Naya Virtual Phone Modal -->
+<div id="newPhoneModal" style="display: none; position: fixed; inset: 0; z-index: 10000; background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); flex-direction: column;">
+  <div style="padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #111; border-bottom: 1px solid #333;">
+    <b style="color: white; font-family: sans-serif; font-size: 16px;">📱 My Virtual Phone</b>
+    <button id="closeNewPhone" style="background: #ff3b30; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer;">✖ Close</button>
+  </div>
+  <!-- Tera naya phone (Myvirtaual) yahan load hoga -->
+  <iframe src="https://atulyaraj4358-cmd.github.io/Myvirtaual/" style="flex: 1; width: 100%; border: none; background: #000;"></iframe>
+</div>
 </body>
 </html>
