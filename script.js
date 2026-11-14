@@ -281,6 +281,12 @@ function count(el, to) { const from = +el.dataset.v || 0, t = performance.now();
 const _r = render; render = function () { _r(); const d = [...S.files, ...S.apps].reduce((a, x) => a + (+x.downloads || 0), 0); count(st.querySelector('[data-n=f]'), S.files.length); count(st.querySelector('[data-n=d]'), d); };
 addEventListener('scroll', () => { $('.hero').style.transform = `translateY(${Math.min(scrollY, 600) * .25}px)`; $('.hero').style.opacity = Math.max(.2, 1 - scrollY / 700); }, {passive:true});
 })();
+/* ---------- NAYA PHONE LOGIC ---------- */
+const newPhoneBtn = document.getElementById('newPhoneBtn');
+const newPhoneModal = document.getElementById('newPhoneModal');
+const closeNewPhone = document.getElementById('closeNewPhone');
 
-// ---------- PHONE SYNC ----------
-{ const _r = render; render = function () { _r(); if(typeof Phone !== 'undefined') Phone.sync(); }; }
+if (newPhoneBtn && newPhoneModal) {
+  newPhoneBtn.onclick = () => { newPhoneModal.style.display = 'flex'; };
+  closeNewPhone.onclick = () => { newPhoneModal.style.display = 'none'; };
+}
