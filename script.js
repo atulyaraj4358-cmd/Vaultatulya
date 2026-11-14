@@ -301,3 +301,17 @@ setTimeout(() => {
     setInterval(changeTitle, 4000);
   }
 }, 500); // 0.5 second baad purana text override karega
+/* ---------- FORCE TITLE OVERRIDE ---------- */
+setTimeout(() => {
+  const el = document.getElementById('title');
+  if (el) {
+    const titles = ["Your Personal Vault.", "Premium Files.", "Unlock the Best.", "Atulya's Vault."];
+    let idx = 0;
+    function change() {
+      el.innerHTML = [...titles[idx]].map((c, i) => c === ' ' ? ' ' : `<span style="animation-delay:${i * 45}ms">${esc(c)}</span>`).join('');
+      idx = (idx + 1) % titles.length;
+    }
+    change();
+    setInterval(change, 4000);
+  }
+}, 1000);
