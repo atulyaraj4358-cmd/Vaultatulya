@@ -242,7 +242,7 @@ let shoot = null, t0 = 0, fr = 0, low = 0, prev = 0;
 (function loop(t) {
   requestAnimationFrame(loop);
   if (t - prev > 500) { t0 = t; fr = 0; } prev = t; fr++;
-  if (t - t0 >= 1000) { const f = fr; fr = 0; t0 = t; if (f < 30 && !document.hidden && fx !== 'off') { if (++low >= 3) { low = 0; setFx(fx === 'high' ? 'low' : 'off', true, true); } } else low = 0; }
+  if (t - t0 >= 1000) { fr = 0; t0 = t; }
   c.clearRect(0, 0, w, h); if (fx === 'off') return;
   c.fillStyle = '#fff'; stars.slice(0, fx === 'high' ? 90 : 30).forEach(s => { c.globalAlpha = .25 + .75 * Math.abs(Math.sin(t / 700 + s.p)); c.fillRect(s.x * w, s.y * h, s.r, s.r); });
   if (fx !== 'high') return;
