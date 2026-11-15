@@ -37,6 +37,7 @@
 <script src="script.js"></script>
   <!-- Naya Virtual Phone Button -->
 <button onclick="document.getElementById('newPhoneModal').style.display = 'flex';" class="btn" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; background: #ff006e; color: white; font-weight: bold; border: none; padding: 12px 20px; border-radius: 30px; box-shadow: 0 4px 15px rgba(255,0,110,0.4);">📱 Open Phone</button>
+
 <!-- Naya Virtual Phone Modal -->
 <div id="newPhoneModal" style="display: none; position: fixed; inset: 0; z-index: 10000; background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); flex-direction: column;">
   <div style="padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #111; border-bottom: 1px solid #333;">
@@ -44,14 +45,18 @@
     <button onclick="document.getElementById('newPhoneModal').style.display = 'none';" style="background: #ff3b30; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer;">✖ Close</button>
   </div>
   <iframe src="https://atulyaraj4358-cmd.github.io/Myvirtaual/" style="flex: 1; width: 100%; border: none; background: #000;"></iframe>
-  <!-- Chat Room Modal (Popup) -->
-  <div id="chatModal" style="display: none; ...">
-    <div style="padding: 15px; ...">
-      <b>💬 Atulya's Chat</b>
-      <button onclick="...">✖ Close</button>
-    </div>
-    <iframe src="https://atulyaraj4358-cmd.github.io/atulya-s_chat/" ...></iframe>
-  </div> <!-- Ye wala closing div ek hi hona chahiye -->
+</div>
 
+<!-- Chat Room Button -->
+<button onclick="document.getElementById('chatModal').style.display = 'flex';" class="btn" style="position: fixed; bottom: 80px; right: 20px; z-index: 9999; background: #007aff; color: white; font-weight: bold; border: none; padding: 12px 20px; border-radius: 30px; box-shadow: 0 4px 15px rgba(0,122,255,0.4);">💬 Chat</button>
+
+<!-- Chat Room Modal (Popup) -->
+<div id="chatModal" style="display: none; position: fixed; inset: 0; z-index: 10000; background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); flex-direction: column;">
+  <div style="padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #111; border-bottom: 1px solid #333;">
+    <b style="color: white; font-family: sans-serif; font-size: 16px;">💬 Atulya's Chat</b>
+    <button onclick="document.getElementById('chatModal').style.display = 'none';" style="background: #ff3b30; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer;">✖ Close</button>
+  </div>
+  <iframe src="https://atulyaraj4358-cmd.github.io/atulya-s_chat/" style="flex: 1; width: 100%; border: none; background: #000;"></iframe>
+</div>
 </body>
 </html>
