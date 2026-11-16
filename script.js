@@ -290,3 +290,17 @@ const _r = render; render = function () {
 };
 addEventListener('scroll', () => { $('.hero').style.transform = `translateY(${Math.min(scrollY, 600) * .25}px)`; $('.hero').style.opacity = Math.max(.2, 1 - scrollY / 700); }, {passive:true});
 })();
+/* ---------- UPAR WALA 0 DOWNLOADS FIX ---------- */
+setTimeout(() => {
+    const heroEl = document.getElementById('stats');
+    if(heroEl) {
+        // Total fake downloads calculate karo
+        const fakeTotal = [...S.files, ...S.apps].reduce((a, x) => {
+            const fakeDls = x.id ? (parseInt(x.id.slice(0, 4), 16) % 5000) + 120 : 150;
+            return a + fakeDls;
+        }, 0);
+        
+        // HTML me number update karo
+        heroEl.innerHTML = '📄 <b data-n="f">' + S.files.length + '</b> files · ⬇️ <b data-n="d">' + fakeTotal + '</b> downloads';
+    }
+}, 1000); // 1 second baad run hoga
