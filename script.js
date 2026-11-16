@@ -96,7 +96,7 @@ function render() {
     return `<article class="card glass" data-id="${esc(x.id)}" data-kind="${x.kind}" style="--i:${loaded ? 0 : i}">
     ${fresh[x.id] > Date.now() ? '<span class="new">NEW</span>' : ''}<span class="ic">${esc(x.icon)}</span>
     <h3>${hl(x.title)}</h3><p>${hl(x.desc)}</p>
-    <div class="meta">${esc(x.type)} · ${esc(x.size || '—')} · ${esc((x.date || '').slice(0, 10))} · 👀 ${fakeViews} views · ⬇️ ${fakeDls} dls · 🛡️ Safe</div>
+    <div class="meta">${esc(x.type)} · ${esc(x.size || '—')} · ${esc((x.date || '').slice(0, 10))} · 👀 ${fakeViews} views · ⬇️ ${fakeDls} Downloades · 🛡️ Safe</div>
     <div class="row"><button class="btn" data-a="dl">⬇️</button><button class="btn ghost" data-a="view">👁️</button><button class="btn ghost" data-a="share">🔗</button>${tok ? '<button class="btn ghost" data-a="del">🗑️</button>' : ''}</div></article>`;
   }).join('') : '<div class="empty">🔍 Nothing here yet. Try another search or tab.</div>';
 
