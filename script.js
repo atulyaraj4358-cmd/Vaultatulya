@@ -154,7 +154,7 @@ $('#grid').addEventListener('click', async e => {
     confetti(); 
   }
   if (b.dataset.a === 'share') { try { await navigator.clipboard.writeText(x.link); } catch { const t = document.createElement('textarea'); t.value = x.link; document.body.append(t); t.select(); document.execCommand('copy'); t.remove(); } toast('success', 'Link copied 🔗'); }
-  if (b.dataset.a === 'view') modal(`<h2>${esc(x.icon)} ${esc(x.title)}</h2><p>${esc(x.desc)}</p><p>${esc(x.type)} · ${esc(x.size)} · ⬇️ ${+x.downloads || 0}</p><p>${(x.tags || []).map(t => '#' + esc(t)).join(' ')}</p><button class="btn" data-close>Close</button>`);
+  if (b.dataset.a === 'view') modal(`<h2>${esc(x.icon)} ${esc(x.title)}</h2><p>${esc(x.desc)}</p><p>${esc(x.type)} · ${esc(x.size)} · ⬇️ ${x.id ? (parseInt(x.id.slice(0, 4), 16) % 5000) + 120 : 150}</p><p>${(x.tags || []).map(t => '#' + esc(t)).join(' ')}</p><button class="btn" data-close>Close</button>`);
   if (b.dataset.a === 'del') {
     hidden.add(id); c.classList.add('out'); let undone = false;
     toast('info', 'Deleted “' + x.title + '”', {label:'Undo', fn:() => { undone = true; hidden.delete(id); render(); }});
