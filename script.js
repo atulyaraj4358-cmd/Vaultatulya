@@ -6,7 +6,6 @@ const THEMES = {aurora:'🌌',sunset:'🌅',ocean:'🌊',candy:'🍬',neon:'🌃
 let S = {version:0, files:[], apps:[]}, tab = 'All', q = '', hidden = new Set(), fresh = {}, known = null, fails = 0, loaded = false;
 let tok = sessionStorage.getItem('av_tok'), user = localStorage.getItem('av_user') || '';
 
-/* ---------- toasts & confetti ---------- */
 function toast(kind, msg, action) {
   const t = document.createElement('div'); t.className = 'toast glass ' + kind;
   const s = document.createElement('span'); s.textContent = ({success:'✅ ',error:'⚠️ ',info:'ℹ️ '}[kind] || '') + msg; t.append(s);
@@ -21,10 +20,8 @@ function confetti() {
     document.body.append(e); setTimeout(() => e.remove(), 3000); }
 }
 
-/* ---------- SUPABASE DATABASE ---------- */
 const SUPABASE_URL = "https://jgpkjkwhfexkjvyzpqar.supabase.co"; 
 const SUPABASE_KEY = "sb_publishable_q6z3S8fROzE3nlyFIeUH4A_Dtg6xkCd"; 
-
 const { createClient } = supabase;
 const dbClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -40,10 +37,7 @@ async function api(action, body) {
             throw new Error('Wrong credentials');
         }
         if (action === 'add') {
-            const newItem = {
-                title: body.title, desc: body.desc, type: body.type, size: body.size,
-                link: body.link, icon: body.icon
-            };
+            const newItem = { title: body.title, desc: body.desc, type: body.type, size: body.size, link: body.link, icon: body.icon };
             const { data, error } = await dbClient.from('vault_files').insert([newItem]).select();
             if (error) throw error;
             return { item: data[0] };
@@ -67,14 +61,10 @@ async function api(action, body) {
 }
 
 function initRealtime() {
-    dbClient.channel('custom-all-channel')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'vault_files' }, payload => { load(); })
-      .subscribe();
+    dbClient.channel('custom-all-channel').on('postgres_changes', { event: '*', schema: 'public', table: 'vault_files' }, payload => { load(); }).subscribe();
 }
-
-
 function setDot(s) { $('#dot').className = 'dot ' + s; $('#pill').hidden = s !== 'off'; }
-/* ---------- sync ---------- */
+
 async function load() {
   setDot('sync');
   try {
@@ -88,8 +78,6 @@ async function load() {
   } catch (e) { fails++; setDot('off'); }
 }
 ['focus', 'online'].forEach(e => addEventListener(e, load)); document.addEventListener('visibilitychange', () => !document.hidden && load());
-
-/* ---------- render ---------- */
 function items() {
   const all = [...S.files.map(x => ({...x, kind:'files'})), ...S.apps.map(x => ({...x, kind:'apps'}))].filter(x => !hidden.has(x.id));
   const f = all.filter(x => tab === 'All' || (tab === 'Apps' ? x.kind === 'apps' || x.type === 'APP' : tab === 'Games' ? x.type === 'GAME' : x.type === tab));
@@ -102,7 +90,6 @@ function render() {
   const list = items(), g = $('#grid'), old = {};
   g.querySelectorAll('.card').forEach(c => old[c.dataset.id] = c.getBoundingClientRect());
   
-  // CARD ME DOWNLOADS KA NUMBER
   g.innerHTML = list.length ? list.map((x, i) => {
     const fakeDls = x.id ? (parseInt(x.id.slice(0, 4), 16) % 5000) + 120 : 150;
     const fakeViews = x.id ? (parseInt(x.id.slice(0, 4), 16) % 500) + 50 : 100;
@@ -129,7 +116,7 @@ function render() {
   }
 }
 function byId(id) { return items().find(x => x.id === id) || [...S.files, ...S.apps].find(x => x.id === id); }
-/* ---------- modal ---------- */
+
 let lastFocus;
 function modal(html) {
   lastFocus = document.activeElement; const m = $('#modal'); m.innerHTML = `<div class="sheet glass" role="dialog" aria-modal="true">${html}</div>`; m.hidden = false;
@@ -139,11 +126,8 @@ function closeModal() { $('#modal').hidden = true; lastFocus?.focus(); }
 $('#modal').addEventListener('click', e => { if (e.target.id === 'modal' || e.target.dataset.close !== undefined) closeModal(); });
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeModal();
-  if (e.key === 'Tab' && !$('#modal').hidden) { const f = [...$('#modal').querySelectorAll('input,textarea,select,button')], a = document.activeElement;
-    if (e.shiftKey && a === f[0]) { e.preventDefault(); f.at(-1).focus(); } else if (!e.shiftKey && a === f.at(-1)) { e.preventDefault(); f[0].focus(); } }
 });
 
-/* ---------- card actions ---------- */
 $('#grid').addEventListener('click', async e => {
   const b = e.target.closest('button[data-a]'); if (!b) return; const c = b.closest('.card'), id = c.dataset.id, x = byId(id); if (!x) return;
   
@@ -165,8 +149,6 @@ $('#grid').addEventListener('click', async e => {
     setTimeout(async () => { if (undone) return; try { await api('delete', {id}); } catch (er) { hidden.delete(id); toast('error', er.message); } load(); }, 6500);
   }
 });
-
-/* ---------- login ---------- */
 function paintUser() { $('#who').textContent = user ? (tok ? '👑 ' : '👤 ') + user : ''; $('#loginBtn').textContent = user ? 'Log out' : 'Log in'; $('#admin').hidden = !tok; render(); }
 $('#loginBtn').onclick = () => {
   if (user) { user = ''; tok = null; localStorage.removeItem('av_user'); sessionStorage.removeItem('av_tok'); paintUser(); return toast('info', 'Logged out'); }
@@ -178,7 +160,6 @@ $('#loginBtn').onclick = () => {
   };
 };
 
-/* ---------- admin add ---------- */
 function addForm(app) {
   modal(`<h2>${app ? '📱 Add App' : '➕ Add File'}</h2><div class="f"><input id="t" placeholder="Title" maxlength="80"><textarea id="d" placeholder="Description" maxlength="300"></textarea>
   <select id="ty"><option value="APK">APK</option><option value="PDF">PDF</option><option value="ZIP">ZIP</option></select>
@@ -193,7 +174,6 @@ function addForm(app) {
 }
 $('#addBtn').onclick = () => addForm(false); $('#addApp').onclick = () => addForm(true);
 
-/* ---------- UI setup ---------- */
 $('#tabs').innerHTML = TABS.map(t => `<button role="tab" aria-selected="${t === 'All'}">${t}</button>`).join('');
 $('#tabs').onclick = e => { const b = e.target.closest('button'); if (!b) return; tab = b.textContent; $('#tabs').querySelectorAll('button').forEach(x => x.setAttribute('aria-selected', x === b)); render(); };
 $('#search').oninput = e => { q = e.target.value.trim(); render(); };
@@ -204,7 +184,6 @@ function setTheme(t) { document.documentElement.dataset.theme = t; localStorage.
 $('#themes').onclick = e => { const b = e.target.closest('button'); if (b) setTheme(b.dataset.t); };
 setTheme(localStorage.getItem('av_theme') in THEMES ? localStorage.getItem('av_theme') : 'aurora');
 
-/* ---------- DYNAMIC PREMIUM TITLE ---------- */
 const premiumTitles = ["Your Personal Vault.", "Premium Files.", "Unlock the Best.", "Atulya's Vault."];
 let titleIdx = 0;
 function changePremiumTitle() {
@@ -220,7 +199,6 @@ addEventListener('scroll', () => { const h = document.documentElement; $('#prog'
 let taps = 0, tt; $('#logo').onclick = () => { taps++; clearTimeout(tt); tt = setTimeout(() => taps = 0, 1500); if (taps >= 5) { taps = 0; confetti(); confetti(); } };
 paintUser(); load().then(() => initRealtime());
 
-/* ===== Phase 4: Animation Booster ===== */
 (() => {
 const de = document.documentElement, LV = ['high', 'low', 'off'];
 let fx = LV.includes(localStorage.getItem('av_fx')) ? localStorage.getItem('av_fx') : 'high';
@@ -229,12 +207,10 @@ const fxb = document.createElement('button'); fxb.className = 'btn sm ghost'; $(
 const setFx = (v, keep, auto) => { fx = v; de.dataset.fx = v; fxb.textContent = '✨ ' + v[0].toUpperCase() + v.slice(1); if (keep) localStorage.setItem('av_fx', v); if (auto) toast('info', 'Effects set to ' + v + ' for smoother speed'); };
 fxb.onclick = () => setFx(LV[(LV.indexOf(fx) + 1) % 3], true); setFx(fx);
 
-/* loader */
 const L = document.createElement('div'); L.id = 'loader'; L.innerHTML = '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44"/></svg><span>🔒</span>'; document.body.append(L);
 setTimeout(() => L.classList.add('gone'), fx === 'off' ? 100 : 1300); setTimeout(() => L.remove(), fx === 'off' ? 300 : 2200);
 if (!known) $('#grid').innerHTML = '<div class="card glass sk"></div>'.repeat(6);
 
-/* stars, floating emoji */
 const cv = document.createElement('canvas'); cv.id = 'fxc'; cv.setAttribute('aria-hidden', 'true'); document.body.prepend(cv); const c = cv.getContext('2d');
 let w, h; const rs = () => { w = cv.width = innerWidth; h = cv.height = innerHeight; }; rs(); addEventListener('resize', rs);
 const stars = Array.from({length:90}, () => ({x:Math.random(), y:Math.random(), r:Math.random() * 1.6 + .4, p:Math.random() * 6}));
@@ -254,7 +230,6 @@ let shoot = null, t0 = 0, fr = 0, low = 0, prev = 0;
   c.globalAlpha = 1;
 })(0);
 
-/* cursor glow, ripple, magnetic */
 const glow = document.createElement('div'); glow.id = 'glow'; document.body.append(glow); let lt = 0; const orbs = $('.orbs');
 document.addEventListener('pointermove', e => {
   glow.style.transform = `translate(${e.clientX - 100}px,${e.clientY - 100}px)`; orbs.style.setProperty('--px', e.clientX / innerWidth - .5); orbs.style.setProperty('--py', e.clientY / innerHeight - .5);
@@ -264,24 +239,17 @@ document.addEventListener('pointermove', e => {
 document.addEventListener('pointerout', e => { const b = e.target.closest?.('.btn'); if (b) b.style.translate = ''; });
 document.addEventListener('pointerdown', e => { const b = e.target.closest('.btn'); if (!b || fx === 'off') return; const r = b.getBoundingClientRect(), s = document.createElement('span'); s.className = 'rip'; s.style.left = e.clientX - r.left + 'px'; s.style.top = e.clientY - r.top + 'px'; b.append(s); setTimeout(() => s.remove(), 650); });
 
-/* theme wave */
 $('#themes').addEventListener('click', e => { const b = e.target.closest('button'); if (!b || fx === 'off') return; const r = b.getBoundingClientRect(), d = document.createElement('div'); d.className = 'wave';
   d.style.left = r.left + r.width / 2 + 'px'; d.style.top = r.top + r.height / 2 + 'px'; d.style.background = `linear-gradient(135deg,${PAL[b.dataset.t]})`; document.body.append(d); setTimeout(() => d.remove(), 950); });
 
-/* tabs indicator */
 const tabs = $('#tabs'), ind = document.createElement('i'); ind.className = 'ind'; tabs.prepend(ind);
 const mv = () => { const b = tabs.querySelector('[aria-selected=true]'); if (b) { ind.style.width = b.offsetWidth + 'px'; ind.style.transform = `translateX(${b.offsetLeft}px)`; } };
 tabs.addEventListener('click', () => requestAnimationFrame(mv)); addEventListener('resize', mv); mv(); document.fonts?.ready.then(mv);
 
-/* download ring */
 $('#grid').addEventListener('click', e => { const b = e.target.closest('button[data-a=dl]'); if (!b || b.dataset.busy) return; b.dataset.busy = 1;
   b.innerHTML = '<svg class="ring" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15"/></svg>'; setTimeout(() => b.textContent = '✅', 1300); setTimeout(() => { b.textContent = '⬇️'; delete b.dataset.busy; }, 2600); });
 
-/* fireworks on confetti (publish, new best, logo x5) + Konami emoji rain */
 function fireworks() { for (let k = 0; k < 3; k++) setTimeout(() => { const x = innerWidth * (.15 + Math.random() * .7), y = innerHeight * (.15 + Math.random() * .4);
   for (let i = 0; i < 18; i++) { const s = document.createElement('span'), a = i / 18 * 6.283; s.className = 'fw'; s.textContent = i % 3 ? '✨' : '🎆'; s.style.left = x + 'px'; s.style.top = y + 'px'; s.style.setProperty('--dx', Math.cos(a) * 110 + 'px'); s.style.setProperty('--dy', Math.sin(a) * 110 + 'px'); document.body.append(s); setTimeout(() => s.remove(), 1100); } }, k * 250); }
 const _cf = confetti; confetti = function () { _cf(); if (fx === 'high') fireworks(); };
 })();
-
-// ---------- PHONE SYNC ----------
-{ const _r = render; render = function () { _r(); if(typeof Phone !== 'undefined') Phone.sync(); }; }
