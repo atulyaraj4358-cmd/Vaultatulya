@@ -91,7 +91,7 @@ function render() {
   g.querySelectorAll('.card').forEach(c => old[c.dataset.id] = c.getBoundingClientRect());
   
   g.innerHTML = list.length ? list.map((x, i) => {
-    const fakeDls = x.id ? (parseInt(x.id.slice(0, 4), 16) % 5000) + 120 : 150;
+    const fakeDls = x.id ? (parseInt(x.id.slice(0, 4), 16) % 900) + 100 : 150;
     const fakeViews = x.id ? (parseInt(x.id.slice(0, 4), 16) % 500) + 50 : 100;
     return `<article class="card glass" data-id="${esc(x.id)}" data-kind="${x.kind}" style="--i:${loaded ? 0 : i}">
     ${fresh[x.id] > Date.now() ? '<span class="new">NEW</span>' : ''}<span class="ic">${esc(x.icon)}</span>
@@ -107,7 +107,7 @@ function render() {
   // UPAR WALA TOTAL NUMBER UPDATE KARNA
   let totalFakeDownloads = 0;
   list.forEach(x => {
-    totalFakeDownloads += x.id ? (parseInt(x.id.slice(0, 4), 16) % 5000) + 120 : 150;
+    totalFakeDownloads += x.id ? (parseInt(x.id.slice(0, 4), 16) % 900) + 100 : 150;
   });
   
   const heroEl = document.getElementById('stats');
