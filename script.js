@@ -1,7 +1,7 @@
 'use strict';
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const TABS = ['All','APK','PDF','ZIP']; 
+const TABS = ['All','APK','PDF','ZIP'];
 const THEMES = {aurora:'🌌',sunset:'🌅',ocean:'🌊',candy:'🍬',neon:'🌃',forest:'🌲'};
 let S = {version:0, files:[], apps:[]}, tab = 'All', q = '', hidden = new Set(), fresh = {}, known = null, fails = 0, loaded = false;
 let tok = sessionStorage.getItem('av_tok'), user = localStorage.getItem('av_user') || '';
@@ -15,53 +15,52 @@ function toast(kind, msg, action) {
   setTimeout(() => t.remove(), action ? 6500 : 4000);
 }
 function confetti() {
-  for (let i = 0; i < 36; i++) { const e = document.createElement('span'); e.className = 'cf'; e.textContent = '🎉✨🎊💎🔒'[i % 5 * 2 % 5] || '🎉';
+  for (let i = 0; i < 36; i++) { const e = document.createElement('span'); e.className = 'cf'; e.textContent = ['🎉','✨','🎊','💎','🔒'][i % 5];
     e.style.left = Math.random() * 100 + 'vw'; e.style.setProperty('--x', (Math.random() * 200 - 100) + 'px'); e.style.animationDelay = Math.random() * .5 + 's';
     document.body.append(e); setTimeout(() => e.remove(), 3000); }
 }
 
-const SUPABASE_URL = "https://jgpkjkwhfexkjvyzpqar.supabase.co"; 
-const SUPABASE_KEY = "sb_publishable_q6z3S8fROzE3nlyFIeUH4A_Dtg6xkCd"; 
+const SUPABASE_URL = "https://jgpkjkwhfexkjvyzpqar.supabase.co";
+const SUPABASE_KEY = "sb_publishable_q6z3S8fROzE3nlyFIeUH4A_Dtg6xkCd";
 const { createClient } = supabase;
 const dbClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 async function api(action, body) {
-    try {
-        if (action === 'list' || action === 'version') {
-            const { data, error } = await dbClient.from('vault_files').select('*').order('date', { ascending: false });
-            if (error) throw error;
-            return { version: Date.now(), files: data || [], apps: [], scores: {}, deleted: [] };
-        }
-        if (action === 'login') {
-            if (body.user === 'atulya' && body.pass === 'admin') return { token: 'admin-token' };
-            throw new Error('Wrong credentials');
-        }
-        if (action === 'add') {
-            const newItem = { title: body.title, desc: body.desc, type: body.type, size: body.size, link: body.link, icon: body.icon };
-            const { data, error } = await dbClient.from('vault_files').insert([newItem]).select();
-            if (error) throw error;
-            return { item: data[0] };
-        }
-        if (action === 'delete') {
-            const { error } = await dbClient.from('vault_files').delete().eq('id', body.id);
-            if (error) throw error;
-            return { ok: true };
-        }
-        if (action === 'increment_download') {
-            const { data } = await dbClient.from('vault_files').select('downloads').eq('id', body.id).single();
-            if (data) await dbClient.from('vault_files').update({ downloads: (data.downloads || 0) + 1 }).eq('id', body.id);
-            return { ok: true };
-        }
-        return { version: Date.now(), files: [], apps: [] };
-    } catch (e) {
-        console.error("Supabase Error:", e);
-        if (typeof toast === 'function') toast('error', 'Database Error: ' + e.message);
-        throw e;
+  try {
+    if (action === 'list' || action === 'version') {
+      const { data, error } = await dbClient.from('vault_files').select('*').order('date', { ascending: false });
+      if (error) throw error;
+      return { version: Date.now(), files: data || [], apps: [], scores: {}, deleted: [] };
     }
+    if (action === 'login') {
+      if (body.user === 'atulya' && body.pass === 'admin') return { token: 'admin-token' };
+      throw new Error('Wrong credentials');
+    }
+    if (action === 'add') {
+      const newItem = { title: body.title, desc: body.desc, type: body.type, size: body.size, link: body.link, icon: body.icon };
+      const { data, error } = await dbClient.from('vault_files').insert([newItem]).select();
+      if (error) throw error;
+      return { item: data[0] };
+    }
+    if (action === 'delete') {
+      const { error } = await dbClient.from('vault_files').delete().eq('id', body.id);
+      if (error) throw error;
+      return { ok: true };
+    }
+    if (action === 'increment_download') {
+      const { data } = await dbClient.from('vault_files').select('downloads').eq('id', body.id).single();
+      if (data) await dbClient.from('vault_files').update({ downloads: (data.downloads || 0) + 1 }).eq('id', body.id);
+      return { ok: true };
+    }
+    return { version: Date.now(), files: [], apps: [] };
+  } catch (e) {
+    console.error('Supabase Error:', e);
+    if (typeof toast === 'function') toast('error', 'Database Error: ' + e.message);
+    throw e;
+  }
 }
-
 function initRealtime() {
-    dbClient.channel('custom-all-channel').on('postgres_changes', { event: '*', schema: 'public', table: 'vault_files' }, payload => { load(); }).subscribe();
+  dbClient.channel('custom-all-channel').on('postgres_changes', { event: '*', schema: 'public', table: 'vault_files' }, () => { load(); }).subscribe();
 }
 function setDot(s) { $('#dot').className = 'dot ' + s; $('#pill').hidden = s !== 'off'; }
 
@@ -78,6 +77,7 @@ async function load() {
   } catch (e) { fails++; setDot('off'); }
 }
 ['focus', 'online'].forEach(e => addEventListener(e, load)); document.addEventListener('visibilitychange', () => !document.hidden && load());
+
 function items() {
   const all = [...S.files.map(x => ({...x, kind:'files'})), ...S.apps.map(x => ({...x, kind:'apps'}))].filter(x => !hidden.has(x.id));
   const f = all.filter(x => tab === 'All' || (tab === 'Apps' ? x.kind === 'apps' || x.type === 'APP' : tab === 'Games' ? x.type === 'GAME' : x.type === tab));
@@ -89,34 +89,23 @@ function hl(s) { const e = esc(s); if (!q) return e; return e.replace(new RegExp
 function render() {
   const list = items(), g = $('#grid'), old = {};
   g.querySelectorAll('.card').forEach(c => old[c.dataset.id] = c.getBoundingClientRect());
-  
   g.innerHTML = list.length ? list.map((x, i) => {
-    const baseNum = x.id ? (parseInt(x.id.slice(0, 4), 16) % 500) + 100 : 150;
-const fakeDls = baseNum;
-const fakeViews = fakeDls + Math.floor(Math.random() * 500) + 200; // Views hamesha 200-700 zyada honge
+    const fakeDls = x.id ? (parseInt(String(x.id).slice(0, 4), 16) % 500) + 100 : 150;
+    const fakeViews = fakeDls + Math.floor(Math.random() * 500) + 200;
     return `<article class="card glass" data-id="${esc(x.id)}" data-kind="${x.kind}" style="--i:${loaded ? 0 : i}">
     ${fresh[x.id] > Date.now() ? '<span class="new">NEW</span>' : ''}<span class="ic">${esc(x.icon)}</span>
     <h3>${hl(x.title)}</h3><p>${hl(x.desc)}</p>
     <div class="meta">${esc(x.type)} · ${esc(x.size || '—')} · ${esc((x.date || '').slice(0, 10))} · 👀 ${fakeViews} views · ⬇️ ${fakeDls} Downloades · 🛡️ Safe</div>
     <div class="row"><button class="btn" data-a="dl">⬇️</button><button class="btn ghost" data-a="view">👁️</button><button class="btn ghost" data-a="share">🔗</button>${tok ? '<button class="btn ghost" data-a="del">🗑️</button>' : ''}</div></article>`;
   }).join('') : '<div class="empty">🔍 Nothing here yet. Try another search or tab.</div>';
-
   g.querySelectorAll('.card').forEach(c => { const o = old[c.dataset.id]; if (!o) return; const n = c.getBoundingClientRect();
     c.style.animation = 'none'; c.animate([{transform:`translate(${o.left - n.left}px,${o.top - n.top}px)`}, {transform:'none'}], {duration:450, easing:'cubic-bezier(.2,1.4,.3,1)'}); });
   loaded = true;
-
-  // UPAR WALA TOTAL NUMBER UPDATE KARNA
-  let totalFakeDownloads = 0;
-  list.forEach(x => {
-    totalFakeDownloads += x.id ? (parseInt(x.id.slice(0, 4), 16) % 500) + 100 : 150;
-  });
-  
+  let total = 0; list.forEach(x => { total += x.id ? (parseInt(String(x.id).slice(0, 4), 16) % 500) + 100 : 150; });
   const heroEl = document.getElementById('stats');
-  if(heroEl) {
-    heroEl.innerHTML = '📄 <b>' + S.files.length + '</b> files · ⬇️ <b>' + totalFakeDownloads + '</b> downloads';
-  }
+  if (heroEl) heroEl.innerHTML = '📄 <b>' + S.files.length + '</b> files · ⬇️ <b>' + total + '</b> downloads';
 }
-function byId(id) { return items().find(x => x.id === id) || [...S.files, ...S.apps].find(x => x.id === id); }
+function byId(id) { return items().find(x => String(x.id) === String(id)) || [...S.files, ...S.apps].find(x => String(x.id) === String(id)); }
 
 let lastFocus;
 function modal(html) {
@@ -125,22 +114,19 @@ function modal(html) {
 }
 function closeModal() { $('#modal').hidden = true; lastFocus?.focus(); }
 $('#modal').addEventListener('click', e => { if (e.target.id === 'modal' || e.target.dataset.close !== undefined) closeModal(); });
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeModal();
-});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
 $('#grid').addEventListener('click', async e => {
   const b = e.target.closest('button[data-a]'); if (!b) return; const c = b.closest('.card'), id = c.dataset.id, x = byId(id); if (!x) return;
-  
-  if (b.dataset.a === 'dl') { 
+  if (b.dataset.a === 'dl') {
     let downloadLink = x.link;
     if (downloadLink.includes('drive.google.com/file/d/')) {
-        const fileId = downloadLink.split('/d/')[1].split('/')[0];
-        downloadLink = `https://drive.google.com/uc?export=download&id=${fileId}`;
+      const fileId = downloadLink.split('/d/')[1].split('/')[0];
+      downloadLink = `https://drive.google.com/uc?export=download&id=${fileId}`;
     }
     const a = document.createElement('a'); a.href = downloadLink; a.download = x.title || 'file'; a.target = '_blank';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    toast('success', 'Download started'); confetti(); 
+    toast('success', 'Download started'); confetti();
   }
   if (b.dataset.a === 'share') { try { await navigator.clipboard.writeText(x.link); } catch { const t = document.createElement('textarea'); t.value = x.link; document.body.append(t); t.select(); document.execCommand('copy'); t.remove(); } toast('success', 'Link copied 🔗'); }
   if (b.dataset.a === 'view') modal(`<h2>${esc(x.icon)} ${esc(x.title)}</h2><p>${esc(x.desc)}</p><p>${esc(x.type)} · ${esc(x.size)}</p><p>${(x.tags || []).map(t => '#' + esc(t)).join(' ')}</p><button class="btn" data-close>Close</button>`);
@@ -150,13 +136,14 @@ $('#grid').addEventListener('click', async e => {
     setTimeout(async () => { if (undone) return; try { await api('delete', {id}); } catch (er) { hidden.delete(id); toast('error', er.message); } load(); }, 6500);
   }
 });
+
 function paintUser() { $('#who').textContent = user ? (tok ? '👑 ' : '👤 ') + user : ''; $('#loginBtn').textContent = user ? 'Log out' : 'Log in'; $('#admin').hidden = !tok; render(); }
 $('#loginBtn').onclick = () => {
   if (user) { user = ''; tok = null; localStorage.removeItem('av_user'); sessionStorage.removeItem('av_tok'); paintUser(); return toast('info', 'Logged out'); }
   modal(`<h2>🔒 Log in</h2><div class="f"><input id="lu" placeholder="Username" autocomplete="username"><input id="lp" type="password" placeholder="Password" autocomplete="current-password"><button class="btn" id="lgo">Log in</button></div>`);
   $('#lgo').onclick = async () => {
     const u = $('#lu').value.trim(), p = $('#lp').value; if (!u || !p) return toast('error', 'Enter username and password');
-    if (u === 'atulya') { try { const r = await api('login', {user:u, pass:p}); tok = r.token; sessionStorage.setItem('av_tok', tok); } catch (e) { return toast('error', e.status === 403 ? 'Wrong admin credentials' : 'Login failed'); } }
+    if (u === 'atulya') { try { const r = await api('login', {user:u, pass:p}); tok = r.token; sessionStorage.setItem('av_tok', tok); } catch (e) { return; } }
     user = u; localStorage.setItem('av_user', u); closeModal(); paintUser(); toast('success', 'Welcome, ' + u + '!' + (tok ? ' 👑' : ''));
   };
 };
@@ -170,7 +157,7 @@ function addForm(app) {
     if (!b.title.trim()) return toast('error', 'Please add a title');
     if (!/^https?:\/\//i.test(b.link)) return toast('error', 'Link must start with http:// or https://');
     if (!confirm('Publish “' + b.title + '” for everyone?')) return;
-    try { const r = await api('add', b); known?.add(r.item.id); closeModal(); confetti(); toast('success', 'Published!'); load(); } catch (e) { toast('error', e.status === 403 ? 'Session expired. Log in again.' : e.message); }
+    try { const r = await api('add', b); known?.add(r.item.id); closeModal(); confetti(); toast('success', 'Published!'); load(); } catch (e) { /* api() already showed the error */ }
   };
 }
 $('#addBtn').onclick = () => addForm(false); $('#addApp').onclick = () => addForm(true);
@@ -178,7 +165,7 @@ $('#addBtn').onclick = () => addForm(false); $('#addApp').onclick = () => addFor
 $('#tabs').innerHTML = TABS.map(t => `<button role="tab" aria-selected="${t === 'All'}">${t}</button>`).join('');
 $('#tabs').onclick = e => { const b = e.target.closest('button'); if (!b) return; tab = b.textContent; $('#tabs').querySelectorAll('button').forEach(x => x.setAttribute('aria-selected', x === b)); render(); };
 $('#search').oninput = e => { q = e.target.value.trim(); render(); };
-$('#themes').innerHTML = Object.entries(THEMES).map(([k, v]) => `<button data-t="${k}" title="${k}" aria-label="${k} theme" style="background:var(--a)">${''}</button>`).join('');
+$('#themes').innerHTML = Object.keys(THEMES).map(k => `<button data-t="${k}" title="${k}" aria-label="${k} theme"></button>`).join('');
 const PAL = {aurora:'#7c5cff,#00d4ff', sunset:'#ff5e62,#ff9966', ocean:'#0072ff,#00c6ff', candy:'#ff6ec4,#7873f5', neon:'#b026ff,#00ffa3', forest:'#11998e,#38ef7d'};
 $('#themes').querySelectorAll('button').forEach(b => b.style.background = `linear-gradient(135deg,${PAL[b.dataset.t]})`);
 function setTheme(t) { document.documentElement.dataset.theme = t; localStorage.setItem('av_theme', t); $('#themes').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.t === t)); }
@@ -191,15 +178,14 @@ function changePremiumTitle() {
   $('#title').innerHTML = [...premiumTitles[titleIdx]].map((c, i) => c === ' ' ? ' ' : `<span style="animation-delay:${i * 45}ms">${esc(c)}</span>`).join('');
   titleIdx = (titleIdx + 1) % premiumTitles.length;
 }
-changePremiumTitle();
-setInterval(changePremiumTitle, 4000);
-
+changePremiumTitle(); setInterval(changePremiumTitle, 4000);
 const words = ['APK','PDF','ZIP','FILE']; let wi = 0;
 setInterval(() => { const w = $('#word'); w.classList.add('out'); setTimeout(() => { wi = (wi + 1) % 4; w.textContent = words[wi]; w.classList.remove('out'); }, 400); }, 2200);
 addEventListener('scroll', () => { const h = document.documentElement; $('#prog').style.transform = `scaleX(${scrollY / Math.max(1, h.scrollHeight - innerHeight)})`; document.querySelector('nav').style.backdropFilter = `blur(${24 + Math.min(scrollY / 20, 16)}px) saturate(180%)`; }, {passive:true});
 let taps = 0, tt; $('#logo').onclick = () => { taps++; clearTimeout(tt); tt = setTimeout(() => taps = 0, 1500); if (taps >= 5) { taps = 0; confetti(); confetti(); } };
 paintUser(); load().then(() => initRealtime());
 
+/* ===== Animation Booster ===== */
 (() => {
 const de = document.documentElement, LV = ['high', 'low', 'off'];
 let fx = LV.includes(localStorage.getItem('av_fx')) ? localStorage.getItem('av_fx') : 'high';
@@ -215,8 +201,8 @@ if (!known) $('#grid').innerHTML = '<div class="card glass sk"></div>'.repeat(6)
 const cv = document.createElement('canvas'); cv.id = 'fxc'; cv.setAttribute('aria-hidden', 'true'); document.body.prepend(cv); const c = cv.getContext('2d');
 let w, h; const rs = () => { w = cv.width = innerWidth; h = cv.height = innerHeight; }; rs(); addEventListener('resize', rs);
 const stars = Array.from({length:90}, () => ({x:Math.random(), y:Math.random(), r:Math.random() * 1.6 + .4, p:Math.random() * 6}));
-const floatEmojis = ['🎮', '📱', '🤖', '📄', '🗜️', '✨'];
-const em = Array.from({length:10}, (_, i) => ({x:Math.random(), y:Math.random(), e: floatEmojis[i % floatEmojis.length], s:Math.random() * .3 + .15}));
+const FE = ['🎮','📱','🤖','📄','🗜️','✨'];
+const em = Array.from({length:10}, (_, i) => ({x:Math.random(), y:Math.random(), e:FE[i % FE.length], s:Math.random() * .3 + .15}));
 let shoot = null, t0 = 0, fr = 0, low = 0, prev = 0;
 (function loop(t) {
   requestAnimationFrame(loop);
@@ -253,4 +239,13 @@ $('#grid').addEventListener('click', e => { const b = e.target.closest('button[d
 function fireworks() { for (let k = 0; k < 3; k++) setTimeout(() => { const x = innerWidth * (.15 + Math.random() * .7), y = innerHeight * (.15 + Math.random() * .4);
   for (let i = 0; i < 18; i++) { const s = document.createElement('span'), a = i / 18 * 6.283; s.className = 'fw'; s.textContent = i % 3 ? '✨' : '🎆'; s.style.left = x + 'px'; s.style.top = y + 'px'; s.style.setProperty('--dx', Math.cos(a) * 110 + 'px'); s.style.setProperty('--dy', Math.sin(a) * 110 + 'px'); document.body.append(s); setTimeout(() => s.remove(), 1100); } }, k * 250); }
 const _cf = confetti; confetti = function () { _cf(); if (fx === 'high') fireworks(); };
+const KON = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a']; let ki = 0;
+document.addEventListener('keydown', e => { ki = e.key === KON[ki] ? ki + 1 : (e.key === KON[0] ? 1 : 0); if (ki === KON.length) { ki = 0; toast('success', 'Konami! 🎮');
+  for (let i = 0; i < 60; i++) { const s = document.createElement('span'); s.className = 'cf'; s.textContent = ['🎮','📱','🤖','📄','🗜️','✨','🔒'][i % 7]; s.style.left = Math.random() * 100 + 'vw'; s.style.setProperty('--x', '0px'); s.style.animationDelay = Math.random() * 1.5 + 's'; document.body.append(s); setTimeout(() => s.remove(), 4000); } } });
+
+const st = document.createElement('p'); st.id = 'stats'; st.className = 'tag'; $('.hero .tag').after(st);
+addEventListener('scroll', () => { $('.hero').style.transform = `translateY(${Math.min(scrollY, 600) * .25}px)`; $('.hero').style.opacity = Math.max(.2, 1 - scrollY / 700); }, {passive:true});
 })();
+
+/* ===== Spatial UI parallax (optional) ===== */
+{ let q2 = 0; addEventListener('pointermove', e => { if (q2) return; q2 = requestAnimationFrame(() => { q2 = 0; const r = document.documentElement.style; r.setProperty('--sx', e.clientX / innerWidth - .5); r.setProperty('--sy', e.clientY / innerHeight - .5); }); }, {passive:true}); }
