@@ -120,3 +120,42 @@ body::after{content:"";position:fixed;inset:-50%;z-index:1000;pointer-events:non
 #loader svg{width:120px;height:120px;grid-area:1/1;transform:rotate(-90deg)}#loader circle{fill:none;stroke:var(--b);stroke-width:4;stroke-linecap:round;stroke-dasharray:277;stroke-dashoffset:277;animation:rf 1.1s ease-out forwards;filter:drop-shadow(0 0 8px var(--a))}
 #loader span{grid-area:1/1;font-size:44px;animation:bob 1.6s ease-in-out infinite}
 #stats b{color:var(--b)}
+/* ===== SPATIAL UI (visionOS style). To go back to classic glass: remove data-ui="spatial" from <html> in index.html ===== */
+html[data-ui=spatial]{--sp:cubic-bezier(.2,1.2,.3,1);font-family:ui-rounded,"SF Pro Rounded",-apple-system,"SF Pro Display",Inter,system-ui,sans-serif}
+[data-ui=spatial] body{background:radial-gradient(120% 90% at 50% -10%,color-mix(in srgb,var(--a) 38%,#10101e),#06060d 72%) fixed}
+[data-ui=spatial] .orbs i{opacity:.22;filter:blur(110px)}
+[data-ui=spatial] body::before,[data-ui=spatial] body::after{display:none}
+[data-ui=spatial] .glass,[data-ui=spatial] .hero{background:linear-gradient(145deg,rgba(255,255,255,.2),rgba(255,255,255,.07));backdrop-filter:blur(44px) saturate(1.7) brightness(1.08);-webkit-backdrop-filter:blur(44px) saturate(1.7) brightness(1.08);border:1px solid rgba(255,255,255,.16);border-radius:36px;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),inset 0 -1px 0 rgba(255,255,255,.08),0 2px 6px rgba(0,0,0,.3),0 30px 80px rgba(0,0,0,.45)}
+[data-ui=spatial] nav{width:max-content;max-width:calc(100% - 20px);margin:14px auto;padding:8px 18px;border-radius:99px;flex-wrap:wrap;justify-content:center}
+[data-ui=spatial] nav b{margin-right:8px}
+[data-ui=spatial] .hero{max-width:880px;margin:28px auto;padding:56px 24px 44px;border-radius:48px;translate:calc(var(--sx,0)*-10px) calc(var(--sy,0)*-8px);transition:translate .5s ease-out}
+[data-ui=spatial] h1{font-weight:600;letter-spacing:-.025em}
+[data-ui=spatial] h1 span{background:none;color:#fff;text-shadow:0 6px 30px rgba(0,0,0,.35)}
+[data-ui=spatial] .badge{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.2);box-shadow:inset 0 1px 0 #fff5}
+[data-ui=spatial] .btn{background:color-mix(in srgb,var(--a) 55%,rgba(255,255,255,.14));border:1px solid rgba(255,255,255,.28);box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 10px 28px rgba(0,0,0,.35);transition:scale .35s var(--sp),filter .25s,transform .3s var(--sp)}
+[data-ui=spatial] .btn.ghost{background:rgba(255,255,255,.14)}
+[data-ui=spatial] .btn::after{display:none}
+[data-ui=spatial] .btn:hover,[data-ui=spatial] .get:hover{scale:1.06;filter:brightness(1.25)}
+[data-ui=spatial] #search{display:block;max-width:560px;margin:0 auto;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);box-shadow:inset 0 1px 0 #fff4;translate:calc(var(--sx,0)*-5px) calc(var(--sy,0)*-4px);transition:translate .5s ease-out,box-shadow .3s}
+[data-ui=spatial] #tabs{margin:18px auto;border-radius:99px;translate:calc(var(--sx,0)*-6px) calc(var(--sy,0)*-5px);transition:translate .5s ease-out}
+[data-ui=spatial] #tabs button:hover{background:rgba(255,255,255,.14)}
+[data-ui=spatial] #tabs .ind{background:rgba(255,255,255,.28);box-shadow:inset 0 1px 0 #fff6,0 6px 18px rgba(0,0,0,.3)}
+[data-ui=spatial] #admin{text-align:center}
+[data-ui=spatial] #grid{perspective:1200px;gap:26px}
+[data-ui=spatial] .card{padding:24px 22px 36px;border-radius:36px}
+[data-ui=spatial] .card:hover{translate:0 -6px 40px;box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 50px 100px rgba(0,0,0,.55)}
+[data-ui=spatial] .card::after{content:"";position:absolute;bottom:11px;left:50%;width:56px;height:5px;margin-left:-28px;border-radius:9px;background:rgba(255,255,255,.35)}
+[data-ui=spatial] .card h3{font-weight:600}
+[data-ui=spatial] .sheet{border-radius:44px}
+[data-ui=spatial] .pi:hover span{filter:brightness(1.2);scale:1.06}
+[data-ui=spatial] #themes button:hover{box-shadow:0 0 0 4px rgba(255,255,255,.25)}
+@media(max-width:600px){[data-ui=spatial] .hero{margin:16px 10px;padding:36px 16px;border-radius:36px}[data-ui=spatial] #tabs{max-width:calc(100% - 20px)}}
+/* ===== fixes: hidden attr, button fonts, spacing ===== */
+[hidden]{display:none!important}
+button,input,textarea,select{font-family:inherit}
+.btn{font-weight:600;font-size:16px;line-height:1.2;vertical-align:middle}.btn.sm{font-size:14px}
+#tabs button{font-weight:600;font-size:15px}.pi{font-size:11px}.f input,.f textarea,.f select,#search{font-size:16px}
+.hero .btn{margin:4px}
+@media(max-width:600px){nav{gap:8px;padding:8px 12px}}
+html{background:#06060d}
+
