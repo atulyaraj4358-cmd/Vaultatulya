@@ -181,7 +181,7 @@ function changePremiumTitle() {
 changePremiumTitle(); setInterval(changePremiumTitle, 4000);
 const words = ['APK','PDF','ZIP','FILE']; let wi = 0;
 setInterval(() => { const w = $('#word'); w.classList.add('out'); setTimeout(() => { wi = (wi + 1) % 4; w.textContent = words[wi]; w.classList.remove('out'); }, 400); }, 2200);
-addEventListener('scroll', () => { const h = document.documentElement; $('#prog').style.transform = `scaleX(${scrollY / Math.max(1, h.scrollHeight - innerHeight)})`; document.querySelector('nav').style.backdropFilter = `blur(${24 + Math.min(scrollY / 20, 16)}px) saturate(180%)`; }, {passive:true});
+addEventListener('scroll', () => { const h = document.documentElement; $('#prog').style.transform = `scaleX(${scrollY / Math.max(1, h.scrollHeight - innerHeight)})`; document.querySelector('nav').style.backdropFilter = `blur(${12 + Math.min(scrollY / 40, 8)}px) saturate(180%)`; }, {passive:true});
 let taps = 0, tt; $('#logo').onclick = () => { taps++; clearTimeout(tt); tt = setTimeout(() => taps = 0, 1500); if (taps >= 5) { taps = 0; confetti(); confetti(); } };
 paintUser(); load().then(() => initRealtime());
 
@@ -197,7 +197,7 @@ fxb.onclick = () => setFx(LV[(LV.indexOf(fx) + 1) % 3], true); setFx(fx);
 const L = document.createElement('div'); L.id = 'loader'; L.innerHTML = '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44"/></svg><span>🔒</span>'; document.body.append(L);
 setTimeout(() => L.classList.add('gone'), fx === 'off' ? 100 : 1300); setTimeout(() => L.remove(), fx === 'off' ? 300 : 2200);
 if (!known) $('#grid').innerHTML = '<div class="card glass sk"></div>'.repeat(6);
-document.head.append(Object.assign(document.createElement('style'), {textContent: '[data-ui=spatial] .orbs i{z-index:-2}[data-ui=spatial] body::before{opacity:.8}[data-ui=spatial] .hero{backdrop-filter:blur(8px) saturate(1.7) brightness(1.08);-webkit-backdrop-filter:blur(8px) saturate(1.7) brightness(1.08)}'}));
+document.head.append(Object.assign(document.createElement('style'), {textContent: '[data-ui=spatial] .orbs i{z-index:-2}[data-ui=spatial] body::before{opacity:.8}[data-ui=spatial] .glass{backdrop-filter:blur(14px) saturate(1.7) brightness(1.08);-webkit-backdrop-filter:blur(14px) saturate(1.7) brightness(1.08)}[data-ui=spatial] .hero{backdrop-filter:blur(8px) saturate(1.7) brightness(1.08);-webkit-backdrop-filter:blur(8px) saturate(1.7) brightness(1.08)}'}));
 
 const cv = document.createElement('canvas'); cv.id = 'fxc'; cv.setAttribute('aria-hidden', 'true'); document.body.prepend(cv); const c = cv.getContext('2d');
 let w, h; const rs = () => { w = cv.width = innerWidth; h = cv.height = innerHeight; }; rs(); addEventListener('resize', rs);
