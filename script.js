@@ -197,10 +197,11 @@ fxb.onclick = () => setFx(LV[(LV.indexOf(fx) + 1) % 3], true); setFx(fx);
 const L = document.createElement('div'); L.id = 'loader'; L.innerHTML = '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44"/></svg><span>🔒</span>'; document.body.append(L);
 setTimeout(() => L.classList.add('gone'), fx === 'off' ? 100 : 1300); setTimeout(() => L.remove(), fx === 'off' ? 300 : 2200);
 if (!known) $('#grid').innerHTML = '<div class="card glass sk"></div>'.repeat(6);
+document.head.append(Object.assign(document.createElement('style'), {textContent: '[data-ui=spatial] .orbs i{z-index:-2}[data-ui=spatial] body::before{opacity:.8}[data-ui=spatial] .hero{backdrop-filter:blur(8px) saturate(1.7) brightness(1.08);-webkit-backdrop-filter:blur(8px) saturate(1.7) brightness(1.08)}'}));
 
 const cv = document.createElement('canvas'); cv.id = 'fxc'; cv.setAttribute('aria-hidden', 'true'); document.body.prepend(cv); const c = cv.getContext('2d');
 let w, h; const rs = () => { w = cv.width = innerWidth; h = cv.height = innerHeight; }; rs(); addEventListener('resize', rs);
-const stars = Array.from({length:90}, () => ({x:Math.random(), y:Math.random(), r:Math.random() * 1.6 + .4, p:Math.random() * 6}));
+const stars = Array.from({length:170}, () => ({x:Math.random(), y:Math.random(), r:Math.random() * 1.2 + .7, p:Math.random() * 6, big:Math.random() < .12}));
 const FE = ['🎮','📱','🤖','📄','🗜️','✨'];
 const em = Array.from({length:10}, (_, i) => ({x:Math.random(), y:Math.random(), e:FE[i % FE.length], s:Math.random() * .3 + .15}));
 let shoot = null, t0 = 0, fr = 0, low = 0, prev = 0;
@@ -209,7 +210,7 @@ let shoot = null, t0 = 0, fr = 0, low = 0, prev = 0;
   if (t - prev > 500) { t0 = t; fr = 0; } prev = t; fr++;
   if (t - t0 >= 1000) { const f = fr; fr = 0; t0 = t; if (f < 30 && !document.hidden && fx !== 'off') { if (++low >= 3) { low = 0; setFx(fx === 'high' ? 'low' : 'off', true, true); } } else low = 0; }
   c.clearRect(0, 0, w, h); if (fx === 'off') return;
-  c.fillStyle = '#fff'; stars.slice(0, fx === 'high' ? 90 : 30).forEach(s => { c.globalAlpha = .25 + .75 * Math.abs(Math.sin(t / 700 + s.p)); c.fillRect(s.x * w, s.y * h, s.r, s.r); });
+  c.fillStyle = '#fff'; stars.slice(0, fx === 'high' ? 170 : 60).forEach(s => { c.globalAlpha = .4 + .6 * Math.abs(Math.sin(t / 700 + s.p)); c.beginPath(); c.arc(s.x * w, s.y * h, s.r * (s.big ? 1.8 : 1), 0, 6.283); if (s.big && fx === 'high') { c.shadowColor = '#cfe3ff'; c.shadowBlur = 8; } c.fill(); c.shadowBlur = 0; });
   if (fx !== 'high') return;
   c.globalAlpha = .45; c.font = '20px serif'; em.forEach(o => { o.y -= o.s / 600; if (o.y < -.05) o.y = 1.05; c.fillText(o.e, o.x * w + Math.sin(t / 1500 + o.x * 9) * 14, o.y * h); });
   if (!shoot && Math.random() < .004) shoot = {x:Math.random() * w, y:Math.random() * h * .4, l:1};
